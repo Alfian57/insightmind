@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'src/app.dart'; // sesuaikan nama file root jika beda
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: InsightMindApp()));
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
