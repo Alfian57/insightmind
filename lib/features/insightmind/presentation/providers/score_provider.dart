@@ -1,10 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:insightmind/features/insightmind/data/repositories/score_repository.dart';
 import 'package:insightmind/features/insightmind/domain/usecases/calculate_risk_level.dart';
 
 /// Simpan jawaban kuisioner di memori (sementara).
-final answersProvider = StateProvider<List<int>>((ref) => []);
+class AnswersNotifier extends Notifier<List<int>> {
+  @override
+  List<int> build() {
+    return [];
+  }
+}
+
+final answersProvider = NotifierProvider<AnswersNotifier, List<int>>(
+  AnswersNotifier.new,
+);
 
 /// Repository sederhana untuk hitung skor total.
 final scoreRepositoryProvider = Provider<ScoreRepository>((ref) {
