@@ -1,53 +1,74 @@
 import 'package:flutter/material.dart';
-import 'result_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/summary_provider.dart';
+import '../widgets/questionnaire_widgets.dart';
 
-class SummaryPage extends StatelessWidget {
+class SummaryPage extends ConsumerStatefulWidget {
   const SummaryPage({super.key});
 
-  // Data statis ringkasan jawaban (contoh)
-  final List<_AnswerSummary> _summaries = const [
-    _AnswerSummary(
-      number: 1,
-      question: 'Dalam 2 minggu terakhir, seberapa sering merasa cemas?',
-      answer: 'Sering',
-    ),
-    _AnswerSummary(
-      number: 2,
-      question: 'Seberapa sering sulit tidur atau gelisah?',
-      answer: 'Kadang-kadang',
-    ),
-    _AnswerSummary(
-      number: 3,
-      question: 'Seberapa sulit berkonsentrasi saat belajar/kerja?',
-      answer: 'Sering',
-      flagged: true, // contoh ditandai untuk ditinjau
-    ),
-    _AnswerSummary(
-      number: 4,
-      question: 'Seberapa sering merasa lelah tanpa sebab jelas?',
-      answer: 'Jarang',
-    ),
-    _AnswerSummary(
-      number: 5,
-      question: 'Seberapa sering merasa putus asa/tertekan?',
-      answer: 'Kadang-kadang',
-    ),
-  ];
+  @override
+  ConsumerState<SummaryPage> createState() => _SummaryPageState();
+}
+
+class _SummaryPageState extends ConsumerState<SummaryPage> {
+  bool _isConfirmed = false;
 
   @override
   Widget build(BuildContext context) {
-    final total = _summaries.length;
-    final dijawab = _summaries.where((s) => s.answer.trim().isNotEmpty).length;
-    final ditandai = _summaries.where((s) => s.flagged).length;
+    final questions = ref.watch(questionsProvider);
+    final questionnaireState = ref.watch(questionnaireProvider);
+    final progress = ref.watch(questionnaireProgressProvider);
+    final canComplete = ref.watch(canCompleteQuestionnaireProvider);
 
-    // Status konfirmasi statis (diasumsikan sudah dikonfirmasi agar tombol aktif)
-    const bool confirmedStatus = true;
+    // Buat data summary dari provider
+    final summaries = questions.asMap().entries.map((entry) {
+      final index = entry.key;
+      final question = entry.value;
+      final answer = questionnaireState.answers[question.id];
+
+      String answerText = 'Belum dijawab';
+      if (answer != null) {
+        final selectedOption = question.options.firstWhere(
+          (option) => option.score == answer,
+          orElse: () => question.options.first,
+        );
+        answerText = selectedOption.label;
+      }
+
+      return _AnswerSummary(
+        number: index + 1,
+        question: question.text,
+        answer: answerText,
+        flagged: answer != null && answer >= 2, // Flag jika skor tinggi
+      );
+    }).toList();
+
+    final total = summaries.length;
+    final dijawab = summaries.where((s) => s.answer != 'Belum dijawab').length;
+    final ditandai = summaries.where((s) => s.flagged).length;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ringkasan Jawaban'),
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
+        actions: [
+          // Button untuk mulai kuisioner jika belum ada jawaban
+          if (dijawab == 0)
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const QuestionnaireWidget(),
+                  ),
+                );
+              },
+              child: const Text(
+                'Mulai Kuisioner',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -57,10 +78,62 @@ class SummaryPage extends StatelessWidget {
                 'Periksa kembali ringkasan jawaban Anda sebelum melihat hasil screening.',
           ),
           const SizedBox(height: 12),
-          // Menggunakan data hasil perhitungan statis
+
+          // Progress indicator
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      const Text('Progress: '),
+                      Text('${(progress * 100).toInt()}%'),
+                      const Spacer(),
+                      Text('$dijawab/$total'),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(value: progress),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 12),
           _SummaryHeader(total: total, dijawab: dijawab, ditandai: ditandai),
           const SizedBox(height: 12),
-          ..._summaries.map((s) => _AnswerTile(summary: s)),
+
+          // Tampilkan pesan jika belum ada jawaban
+          if (summaries.isEmpty || dijawab == 0) ...[
+            const Card(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Icon(Icons.quiz_outlined, size: 64, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      'Belum ada jawaban',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Mulai kuisioner untuk melihat ringkasan jawaban Anda.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ] else ...[
+            ...summaries.map((s) => _AnswerTile(summary: s)),
+          ],
+
           const SizedBox(height: 96), // ruang untuk panel aksi bawah
         ],
       ),
@@ -80,14 +153,19 @@ class SummaryPage extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Checkbox dibuat non-interaktif
+              // Checkbox untuk konfirmasi
               CheckboxListTile(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Saya sudah meninjau ringkasan jawaban'),
-                value: confirmedStatus, // Nilai statis
-                onChanged:
-                    null, // PENTING: null, karena StatelessWidget tidak bisa mengubah state
+                value: _isConfirmed,
+                onChanged: dijawab > 0
+                    ? (value) {
+                        setState(() {
+                          _isConfirmed = value ?? false;
+                        });
+                      }
+                    : null,
                 controlAffinity: ListTileControlAffinity.leading,
               ),
               const SizedBox(height: 8),
@@ -95,30 +173,47 @@ class SummaryPage extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () {
-                        // Aksi hanya tampilan notifikasi (simulasi aksi)
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Aksi ubah jawaban (UI statis contoh)',
-                            ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.edit_outlined),
-                      label: const Text('Ubah Jawaban'),
+                      onPressed: dijawab > 0
+                          ? () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const QuestionnaireWidget(),
+                                ),
+                              );
+                            }
+                          : () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const QuestionnaireWidget(),
+                                ),
+                              );
+                            },
+                      icon: Icon(
+                        dijawab > 0
+                            ? Icons.edit_outlined
+                            : Icons.play_arrow_outlined,
+                      ),
+                      label: Text(
+                        dijawab > 0 ? 'Ubah Jawaban' : 'Mulai Kuisioner',
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton.icon(
-                      // Tombol selalu aktif (berdasarkan confirmedStatus statis)
-                      onPressed: confirmedStatus
+                      onPressed: (_isConfirmed && canComplete)
                           ? () {
-                              // Navigasi ke halaman hasil (tetap berfungsi)
+                              // Complete questionnaire dan navigasi ke hasil
+                              if (!questionnaireState.isCompleted) {
+                                ref
+                                    .read(questionnaireProvider.notifier)
+                                    .completeQuestionnaire();
+                              }
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (_) => const ResultPage(),
+                                  builder: (_) => const ResultWidget(),
                                 ),
                               );
                             }
