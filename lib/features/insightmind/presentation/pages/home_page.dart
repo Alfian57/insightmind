@@ -57,14 +57,14 @@ class HomePage extends ConsumerWidget {
 
             // Text untuk hasil terakhir
             const Text(
-              'Jawaban terakhir (minggu 2 (masih bisa dipakai latihan)',
+              'Latihan Minggu 2 - Simulasi Jawaban',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Wrap(
               spacing: 8,
               children: [
                 for (int i = 0; i < answers.length; i++)
-                  Chip(label: Text('${answers[i]}')),
+                  Chip(label: Text('${answers[i]}')),
               ],
             ),
           ],
@@ -75,9 +75,9 @@ class HomePage extends ConsumerWidget {
         foregroundColor: Colors.white,
         onPressed: () {
           // Tambah data dummy (latihan minggu)
-          final now = (DateTime.now().millisecondsSinceEpoch % 4).toInt();
+          final newValue = (DateTime.now().millisecondsSinceEpoch % 4).toInt();
           final current = [...ref.read(answersProvider)];
-          current.add(now);
+          current.add(newValue);
           ref.read(answersProvider.notifier).setAnswers(current);
         },
         child: const Icon(Icons.add),

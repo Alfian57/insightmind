@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:insightmind/features/insightmind/presentation/pages/result_page.dart';
+import 'package:insightmind/features/insightmind/presentation/pages/summary_page.dart';
 import 'package:insightmind/features/insightmind/presentation/providers/score_provider.dart';
 import 'package:insightmind/features/insightmind/presentation/providers/questionnaire_provider.dart';
-import 'package:insightmind/features/insightmind/domain/entities/question.dart';
+import 'package:insightmind/features/insightmind/presentation/widgets/screening_question_tile.dart';
 
 class ScreeningPage extends ConsumerWidget {
   const ScreeningPage({super.key});
@@ -27,7 +27,7 @@ class ScreeningPage extends ConsumerWidget {
           final q = questions[index];
           final selected =
               qState.answers[q.id]; // skor terpilih (0..3) atau null
-          return _QuestionTile(
+          return ScreeningQuestionTile(
             question: q,
             selectedScore: selected,
             onSelected: (score) {
@@ -60,46 +60,11 @@ class ScreeningPage extends ConsumerWidget {
 
             Navigator.of(
               context,
-            ).push(MaterialPageRoute(builder: (_) => const ResultPage()));
+            ).push(MaterialPageRoute(builder: (_) => const SummaryPage()));
           },
           child: const Text('Lihat Hasil'),
         ),
       ),
-    );
-  }
-}
-
-class _QuestionTile extends StatelessWidget {
-  final Question question;
-  final int? selectedScore;
-  final ValueChanged<int> onSelected;
-
-  const _QuestionTile({
-    required this.question,
-    required this.selectedScore,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(question.text, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final opt in question.options)
-              ChoiceChip(
-                label: Text(opt.label),
-                selected: selectedScore == opt.score,
-                onSelected: (_) => onSelected(opt.score),
-              ),
-          ],
-        ),
-      ],
     );
   }
 }

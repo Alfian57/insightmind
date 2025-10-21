@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:insightmind/features/insightmind/presentation/widgets/summary_answer.dart';
 import 'package:insightmind/features/insightmind/presentation/widgets/summary_answer_tile.dart';
 import 'package:insightmind/features/insightmind/presentation/widgets/summary_header.dart';
 import 'package:insightmind/features/insightmind/presentation/widgets/summary_info_banner.dart';
 import '../providers/summary_provider.dart';
-import '../widgets/questionnaire_widgets.dart';
 
 class SummaryPage extends ConsumerStatefulWidget {
   const SummaryPage({super.key});
@@ -15,37 +13,12 @@ class SummaryPage extends ConsumerStatefulWidget {
 }
 
 class _SummaryPageState extends ConsumerState<SummaryPage> {
-  bool _isConfirmed = false;
-
   @override
   Widget build(BuildContext context) {
-    final questions = ref.watch(questionsProvider);
-    final questionnaireState = ref.watch(questionnaireProvider);
+    // Ambil data dari provider
+    // Providers used by this page
     final progress = ref.watch(questionnaireProgressProvider);
-    final canComplete = ref.watch(canCompleteQuestionnaireProvider);
-
-    // Buat data summary dari provider
-    final summaries = questions.asMap().entries.map((entry) {
-      final index = entry.key;
-      final question = entry.value;
-      final answer = questionnaireState.answers[question.id];
-
-      String answerText = 'Belum dijawab';
-      if (answer != null) {
-        final selectedOption = question.options.firstWhere(
-          (option) => option.score == answer,
-          orElse: () => question.options.first,
-        );
-        answerText = selectedOption.label;
-      }
-
-      return SummaryAnswer(
-        number: index + 1,
-        question: question.text,
-        answer: answerText,
-        flagged: answer != null && answer >= 2, // Flag jika skor tinggi
-      );
-    }).toList();
+    final summaries = ref.watch(summaryListProvider);
 
     final total = summaries.length;
     final dijawab = summaries.where((s) => s.answer != 'Belum dijawab').length;
@@ -56,23 +29,7 @@ class _SummaryPageState extends ConsumerState<SummaryPage> {
         title: const Text('Ringkasan Jawaban'),
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
-        actions: [
-          // Button untuk mulai kuisioner jika belum ada jawaban
-          if (dijawab == 0)
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const QuestionnaireWidget(),
-                  ),
-                );
-              },
-              child: const Text(
-                'Mulai Kuisioner',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-        ],
+        actions: [],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -137,104 +94,7 @@ class _SummaryPageState extends ConsumerState<SummaryPage> {
           ] else ...[
             ...summaries.map((s) => SummaryAnswerTile(summary: s)),
           ],
-
-          const SizedBox(height: 96), // ruang untuk panel aksi bawah
         ],
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha((0.06 * 255).toInt()),
-                blurRadius: 8,
-                offset: const Offset(0, -2),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Checkbox untuk konfirmasi
-              CheckboxListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Saya sudah meninjau ringkasan jawaban'),
-                value: _isConfirmed,
-                onChanged: dijawab > 0
-                    ? (value) {
-                        setState(() {
-                          _isConfirmed = value ?? false;
-                        });
-                      }
-                    : null,
-                controlAffinity: ListTileControlAffinity.leading,
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: dijawab > 0
-                          ? () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const QuestionnaireWidget(),
-                                ),
-                              );
-                            }
-                          : () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const QuestionnaireWidget(),
-                                ),
-                              );
-                            },
-                      icon: Icon(
-                        dijawab > 0
-                            ? Icons.edit_outlined
-                            : Icons.play_arrow_outlined,
-                      ),
-                      label: Text(
-                        dijawab > 0 ? 'Ubah Jawaban' : 'Mulai Kuisioner',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: (_isConfirmed && canComplete)
-                          ? () {
-                              // Complete questionnaire dan navigasi ke hasil
-                              if (!questionnaireState.isCompleted) {
-                                ref
-                                    .read(questionnaireProvider.notifier)
-                                    .completeQuestionnaire();
-                              }
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => const ResultWidget(),
-                                ),
-                              );
-                            }
-                          : null,
-                      icon: const Icon(Icons.check_circle_outlined),
-                      label: const Text('Lihat Hasil'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.indigo,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
