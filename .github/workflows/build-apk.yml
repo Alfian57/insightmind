@@ -1,0 +1,46 @@
+name: Build & Release Flutter APK
+
+on:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+
+jobs:
+    build-and-release:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Java
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "temurin"
+                  java-version: "17"
+
+            - name: Setup Flutter
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+
+            - name: Install dependencies
+              run: flutter pub get
+
+            - name: Build APK Release
+              run: flutter build apk --release
+
+            - name: Rename APK file
+              run: mv build/app/outputs/flutter-apk/app-release.apk insightmind-release.apk
+
+            - name: Create or Update GitHub Release
+              uses: softprops/action-gh-release@v1
+              with:
+                  name: Latest Build (from main)
+                  tag_name: latest-main
+                  prerelease: true
+                  files: insightmind-release.apk
+
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
