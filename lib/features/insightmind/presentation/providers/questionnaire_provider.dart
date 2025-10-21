@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../domain/entities/question.dart';
+import 'package:insightmind/features/insightmind/domain/entities/question.dart';
 
 /// State: map id pertanyaan -> skor (0..3)
 class QuestionnaireState {
@@ -15,8 +15,9 @@ class QuestionnaireState {
   int get totalScore => answers.values.fold(0, (a, b) => a + b);
 }
 
-class QuestionnaireNotifier extends StateNotifier<QuestionnaireState> {
-  QuestionnaireNotifier() : super(const QuestionnaireState());
+class QuestionnaireNotifier extends Notifier<QuestionnaireState> {
+  @override
+  QuestionnaireState build() => const QuestionnaireState();
 
   void selectAnswer({required String questionId, required int score}) {
     final newMap = Map<String, int>.from(state.answers);
@@ -36,6 +37,6 @@ final questionsProvider = Provider<List<Question>>((ref) {
 
 /// Provider state form
 final questionnaireProvider =
-    StateNotifierProvider<QuestionnaireNotifier, QuestionnaireState>((ref) {
-  return QuestionnaireNotifier();
-});
+    NotifierProvider<QuestionnaireNotifier, QuestionnaireState>(
+      QuestionnaireNotifier.new,
+    );
