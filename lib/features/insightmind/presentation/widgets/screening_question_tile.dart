@@ -20,15 +20,18 @@ class ScreeningQuestionTile extends StatelessWidget {
       children: [
         Text(question.text, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        Column(
           children: [
             for (final opt in question.options)
-              ChoiceChip(
-                label: Text(opt.label),
-                selected: selectedScore == opt.score,
-                onSelected: (_) => onSelected(opt.score),
+              RadioListTile<int>(
+                value: opt.score,
+                groupValue: selectedScore,
+                onChanged: (value) {
+                  if (value != null) onSelected(value);
+                },
+                title: Text(opt.label),
+                contentPadding: EdgeInsets.zero,
+                dense: true,
               ),
           ],
         ),
