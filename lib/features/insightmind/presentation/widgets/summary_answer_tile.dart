@@ -28,12 +28,6 @@ class SummaryAnswerTile extends StatelessWidget {
           padding: const EdgeInsets.only(top: 6),
           child: Text('Jawaban Anda: ${summary.answer}'),
         ),
-        trailing: summary.flagged
-            ? const Tooltip(
-                message: 'Ditandai untuk ditinjau',
-                child: Icon(Icons.flag_outlined, color: Colors.orange),
-              )
-            : null,
       ),
     );
   }

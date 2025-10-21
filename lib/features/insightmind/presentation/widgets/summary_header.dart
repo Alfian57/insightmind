@@ -2,22 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:insightmind/features/insightmind/presentation/widgets/summary_stat_chip.dart';
 
 class SummaryHeader extends StatelessWidget {
-  const SummaryHeader({
-    super.key,
-    required this.total,
-    required this.dijawab,
-    required this.ditandai,
-  });
+  const SummaryHeader({super.key, required this.total, required this.answered});
 
   final int total;
-  final int dijawab;
-  final int ditandai;
+  final int answered;
 
   @override
   Widget build(BuildContext context) {
     final totalStr = total.toString();
-    final dijawabStr = dijawab.toString();
-    final ditandaiStr = ditandai.toString();
+    final dijawabStr = answered.toString();
 
     return Card(
       elevation: 0,
@@ -37,11 +30,6 @@ class SummaryHeader extends StatelessWidget {
               label: 'Dijawab',
               value: dijawabStr,
               color: Colors.green,
-            ),
-            SummaryStatChip(
-              label: 'Ditandai',
-              value: ditandaiStr,
-              color: Colors.orange,
             ),
           ],
         ),

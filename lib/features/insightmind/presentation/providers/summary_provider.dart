@@ -3,10 +3,9 @@ import 'package:insightmind/features/insightmind/domain/entities/question.dart';
 import 'package:insightmind/features/insightmind/domain/entities/mental_result.dart';
 import 'package:insightmind/features/insightmind/presentation/widgets/summary_answer.dart';
 import 'package:insightmind/features/insightmind/presentation/providers/questionnaire_provider.dart';
-import 'package:insightmind/features/insightmind/presentation/providers/score_provider.dart'
-    show calculateRiskProvider;
+import 'package:insightmind/features/insightmind/presentation/providers/score_provider.dart';
 
-/// Progress (0.0 .. 1.0) based on number of answered questions.
+/// Progres (0.0 .. 1.0) berdasarkan jumlah pertanyaan yang sudah dijawab.
 final questionnaireProgressProvider = Provider<double>((ref) {
   final questions = ref.watch(questionsProvider);
   final state = ref.watch(questionnaireProvider);
@@ -17,7 +16,7 @@ final questionnaireProgressProvider = Provider<double>((ref) {
   return value;
 });
 
-/// List of unanswered questions.
+/// Daftar pertanyaan yang belum dijawab.
 final unansweredQuestionsProvider = Provider<List<Question>>((ref) {
   final questions = ref.watch(questionsProvider);
   final state = ref.watch(questionnaireProvider);
@@ -25,14 +24,14 @@ final unansweredQuestionsProvider = Provider<List<Question>>((ref) {
   return questions.where((q) => !answers.containsKey(q.id)).toList();
 });
 
-/// Whether the questionnaire is ready to be completed (all questions answered).
+/// Apakah kuesioner sudah siap diselesaikan (semua pertanyaan sudah dijawab).
 final canCompleteQuestionnaireProvider = Provider<bool>((ref) {
   final questions = ref.watch(questionsProvider);
   final state = ref.watch(questionnaireProvider);
   return questions.isNotEmpty && state.answers.length >= questions.length;
 });
 
-/// Derived mental result (null if not all answered yet).
+/// Hasil mental yang didapat (null jika belum semua dijawab).
 final mentalResultProvider = Provider<MentalResult?>((ref) {
   final state = ref.watch(questionnaireProvider);
   final questions = ref.watch(questionsProvider);
@@ -42,7 +41,7 @@ final mentalResultProvider = Provider<MentalResult?>((ref) {
   return usecase.execute(state.totalScore);
 });
 
-/// Simple answer statistics computed from current answers.
+/// Statistik jawaban sederhana yang dihitung dari jawaban saat ini.
 final answerStatsProvider = Provider<Map<String, num>>((ref) {
   final state = ref.watch(questionnaireProvider);
   final values = state.answers.values.toList();
@@ -66,7 +65,7 @@ final answerStatsProvider = Provider<Map<String, num>>((ref) {
   };
 });
 
-/// Summary list used by UI: maps question -> chosen label and flagged state.
+/// Daftar ringkasan yang digunakan oleh UI: memetakan pertanyaan -> label yang dipilih dan status flag.
 final summaryListProvider = Provider<List<SummaryAnswer>>((ref) {
   final questions = ref.watch(questionsProvider);
   final state = ref.watch(questionnaireProvider);
@@ -90,7 +89,6 @@ final summaryListProvider = Provider<List<SummaryAnswer>>((ref) {
       number: index + 1,
       question: question.text,
       answer: answerText,
-      flagged: answer != null && answer >= 2,
     );
   }).toList();
 });

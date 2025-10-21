@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:insightmind/features/insightmind/presentation/pages/result_page.dart';
 import 'package:insightmind/features/insightmind/presentation/widgets/summary_answer_tile.dart';
 import 'package:insightmind/features/insightmind/presentation/widgets/summary_header.dart';
 import 'package:insightmind/features/insightmind/presentation/widgets/summary_info_banner.dart';
@@ -15,14 +16,11 @@ class SummaryPage extends ConsumerStatefulWidget {
 class _SummaryPageState extends ConsumerState<SummaryPage> {
   @override
   Widget build(BuildContext context) {
-    // Ambil data dari provider
-    // Providers used by this page
     final progress = ref.watch(questionnaireProgressProvider);
     final summaries = ref.watch(summaryListProvider);
 
     final total = summaries.length;
-    final dijawab = summaries.where((s) => s.answer != 'Belum dijawab').length;
-    final ditandai = summaries.where((s) => s.flagged).length;
+    final answered = summaries.where((s) => s.answer != 'Belum dijawab').length;
 
     return Scaffold(
       appBar: AppBar(
@@ -51,7 +49,7 @@ class _SummaryPageState extends ConsumerState<SummaryPage> {
                       const Text('Progress: '),
                       Text('${(progress * 100).toInt()}%'),
                       const Spacer(),
-                      Text('$dijawab/$total'),
+                      Text('$answered/$total'),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -62,11 +60,11 @@ class _SummaryPageState extends ConsumerState<SummaryPage> {
           ),
 
           const SizedBox(height: 12),
-          SummaryHeader(total: total, dijawab: dijawab, ditandai: ditandai),
+          SummaryHeader(total: total, answered: answered),
           const SizedBox(height: 12),
 
           // Tampilkan pesan jika belum ada jawaban
-          if (summaries.isEmpty || dijawab == 0) ...[
+          if (summaries.isEmpty || answered == 0) ...[
             const Card(
               child: Padding(
                 padding: EdgeInsets.all(16),
@@ -95,6 +93,17 @@ class _SummaryPageState extends ConsumerState<SummaryPage> {
             ...summaries.map((s) => SummaryAnswerTile(summary: s)),
           ],
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: FilledButton(
+          onPressed: () {
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const ResultPage()));
+          },
+          child: const Text('Lihat Hasil'),
+        ),
       ),
     );
   }

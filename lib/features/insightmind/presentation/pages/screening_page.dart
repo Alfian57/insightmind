@@ -62,7 +62,7 @@ class ScreeningPage extends ConsumerWidget {
               context,
             ).push(MaterialPageRoute(builder: (_) => const SummaryPage()));
           },
-          child: const Text('Lihat Hasil'),
+          child: const Text('Lihat Ringkasan'),
         ),
       ),
     );
