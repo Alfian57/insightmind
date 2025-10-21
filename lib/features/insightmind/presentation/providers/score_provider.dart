@@ -8,6 +8,16 @@ class AnswersNotifier extends Notifier<List<int>> {
   List<int> build() {
     return [];
   }
+
+  /// Replace entire answers list.
+  void setAnswers(List<int> answers) {
+    state = List<int>.from(answers);
+  }
+
+  /// Append a single answer.
+  void addAnswer(int answer) {
+    state = [...state, answer];
+  }
 }
 
 final answersProvider = NotifierProvider<AnswersNotifier, List<int>>(

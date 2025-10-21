@@ -1,21 +1,17 @@
 import '../entities/mental_result.dart';
 
 class CalculateRiskLevel {
-  // Use case: menentukan level risiko berdasarkan skor
   MentalResult execute(int score) {
     String risk;
 
-    if (score < 30) {
-      risk = 'Rendah';
-    } else if (score < 70) {
+    if (score >= 20) {
+      risk = 'Tinggi';
+    } else if (score >= 10) {
       risk = 'Sedang';
     } else {
-      risk = 'Tinggi';
+      risk = 'Rendah';
     }
 
     return MentalResult(score: score, riskLevel: risk);
   }
 }
-
-
-

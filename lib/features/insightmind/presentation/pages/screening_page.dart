@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../domain/entities/question.dart';
-import '../../providers/questionnaire_provider.dart';
-import '../../providers/score_provider.dart'; // dari Minggu 2 (resultProvider/answersProvider)
-import 'result_page.dart';
+import 'package:insightmind/features/insightmind/presentation/pages/result_page.dart';
+import 'package:insightmind/features/insightmind/presentation/providers/score_provider.dart';
+import 'package:insightmind/features/insightmind/presentation/providers/questionnaire_provider.dart';
+import 'package:insightmind/features/insightmind/domain/entities/question.dart';
 
 class ScreeningPage extends ConsumerWidget {
   const ScreeningPage({super.key});
@@ -25,7 +25,8 @@ class ScreeningPage extends ConsumerWidget {
         separatorBuilder: (_, __) => const Divider(height: 24),
         itemBuilder: (context, index) {
           final q = questions[index];
-          final selected = qState.answers[q.id]; // skor terpilih (0..3) atau null
+          final selected =
+              qState.answers[q.id]; // skor terpilih (0..3) atau null
           return _QuestionTile(
             question: q,
             selectedScore: selected,
@@ -50,17 +51,16 @@ class ScreeningPage extends ConsumerWidget {
               return;
             }
 
-            // Alirkan jawaban ke `answersProvider` (Minggu 2) agar pipeline lama tetap jalan
             final answersOrdered = <int>[];
             for (final q in questions) {
               answersOrdered.add(qState.answers[q.id]!);
             }
 
-            ref.read(answersProvider.notifier).state = answersOrdered;
+            ref.read(answersProvider.notifier).setAnswers(answersOrdered);
 
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const ResultPage()),
-            );
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const ResultPage()));
           },
           child: const Text('Lihat Hasil'),
         ),
@@ -85,10 +85,7 @@ class _QuestionTile extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          question.text,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        Text(question.text, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
