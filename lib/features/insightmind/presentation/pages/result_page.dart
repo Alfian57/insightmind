@@ -1,12 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:insightmind/features/insightmind/presentation/providers/history_providers.dart';
 import '../providers/score_provider.dart';
 
-class ResultPage extends ConsumerWidget {
+class ResultPage extends ConsumerStatefulWidget {
   const ResultPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ResultPage> createState() => _ResultPageState();
+}
+
+class _ResultPageState extends ConsumerState<ResultPage> {
+  bool _saved = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_saved) {
+      final result = ref.read(resultProvider);
+      ref
+          .read(historyRepositoryProvider)
+          .addRecord(score: result.score, riskLevel: result.riskLevel);
+      _saved = true;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final result = ref.watch(resultProvider);
 
     String recommendation;
@@ -65,7 +85,12 @@ class ResultPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(recommendation, textAlign: TextAlign.center),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Hasil telah disimpan di perangkat (Riwayat Screening).',
+                    style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                  ),
+                  const SizedBox(height: 12),
                   FilledButton.icon(
                     onPressed: () {
                       Navigator.pop(context);

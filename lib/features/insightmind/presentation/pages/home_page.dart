@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:insightmind/features/insightmind/presentation/pages/history_page.dart';
 import '../providers/score_provider.dart';
 import 'screening_page.dart';
 
@@ -11,7 +12,20 @@ class HomePage extends ConsumerWidget {
     final answers = ref.watch(answersProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('InsightMind')),
+      appBar: AppBar(
+        title: const Text('InsightMind'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.history),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (__) => const HistoryPage()),
+              );
+            },
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -92,6 +106,17 @@ class HomePage extends ConsumerWidget {
             ],
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.indigo,
+        onPressed: () {
+          final newValue = (DateTime.now().millisecondsSinceEpoch % 4).toInt();
+          final current = [...ref.read(answersProvider)];
+          current.add(newValue);
+          // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+          ref.read(answersProvider.notifier).state = current;
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
