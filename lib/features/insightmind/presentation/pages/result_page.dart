@@ -12,7 +12,8 @@ class ResultPage extends ConsumerWidget {
     String recommendation;
     switch (result.riskLevel) {
       case 'Tinggi':
-        recommendation = 'Pertimbangkan berbicara dengan konselor/psikolog. '
+        recommendation =
+            'Pertimbangkan berbicara dengan konselor/psikolog. '
             'Kurangi beban, istirahat cukup, dan hubungi layanan kampus.';
         break;
       case 'Sedang':
@@ -26,34 +27,56 @@ class ResultPage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Hasil Screening'),
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: const Text('Hasil Screening')),
       body: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text('Skor Anda: ${result.score}',
-                style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 8),
-            Text('Tingkat Risiko: ${result.riskLevel}',
-                style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 24),
-            Text(
-              recommendation,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge,
+        child: Center(
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
-            const Spacer(),
-            const Text(
-              'Disclaimer: InsightMind bersifat edukatif, bukan alat diagnosis medis.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontStyle: FontStyle.italic),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.emoji_objects,
+                    size: 60,
+                    color: Colors.indigo,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Skor Anda: ${result.score}',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  Text(
+                    'Tingkat Risiko: ${result.riskLevel}',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: result.riskLevel == 'Tinggi'
+                          ? Colors.red
+                          : result.riskLevel == 'Sedang'
+                          ? Colors.orange
+                          : Colors.green,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(recommendation, textAlign: TextAlign.center),
+                  const SizedBox(height: 20),
+                  FilledButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text('Kembali'),
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         ),
       ),
     );
