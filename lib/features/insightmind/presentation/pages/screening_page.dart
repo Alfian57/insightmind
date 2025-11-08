@@ -136,18 +136,18 @@ class _QuestionCard extends StatelessWidget {
                 context,
               ).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final opt in question.options)
-                  ChoiceChip(
-                    label: Text(opt.label),
-                    selected: selectedScore == opt.score,
-                    onSelected: (_) => onSelected(opt.score),
-                  ),
-              ],
+            const SizedBox(height: 8),
+            ...question.options.map(
+              (opt) => RadioListTile<int>(
+                title: Text(opt.label),
+                value: opt.score,
+                groupValue: selectedScore,
+                onChanged: (value) {
+                  if (value != null) onSelected(value);
+                },
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+              ),
             ),
           ],
         ),
