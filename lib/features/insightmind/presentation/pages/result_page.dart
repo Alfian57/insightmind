@@ -17,12 +17,19 @@ class _ResultPageState extends ConsumerState<ResultPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_saved) {
-      final result = ref.read(resultProvider);
-      ref
-          .read(historyRepositoryProvider)
-          .addRecord(score: result.score, riskLevel: result.riskLevel);
-      _saved = true;
+      _saveResult();
     }
+  }
+
+  Future<void> _saveResult() async {
+    final result = ref.read(resultProvider);
+    await ref
+        .read(historyRepositoryProvider)
+        .addRecord(score: result.score, riskLevel: result.riskLevel);
+
+    // Refresh history list setelah menyimpan
+    refreshHistory(ref);
+    _saved = true;
   }
 
   @override
