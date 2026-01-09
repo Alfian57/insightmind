@@ -45,5 +45,8 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Camera Permission for PPG -->
+	<key>NSCameraUsageDescription</key>
+	<string>InsightMind memerlukan akses kamera untuk mengukur PPG (detak jantung) melalui jari Anda.</string>
 </dict>
 </plist>
